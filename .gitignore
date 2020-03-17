@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/dirimere
+dirimere.so
+dirimere.dylib
+dirimere.dll
+dirimere.a
+dirimere.lib
+dirimere-test-*
+*.exe
+*.o
+*.obj
+*.lst

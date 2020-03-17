@@ -1,0 +1,5 @@
+name "dirimere"
+description "A minimal D application."
+authors "dao"
+copyright "Copyright © 2020, dao"
+license "proprietary"
