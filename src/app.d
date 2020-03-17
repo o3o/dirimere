@@ -28,7 +28,7 @@
 
 module app;
 
-import std.process : execute;
+import std.stdio : writefln, writeln;
 import std.experimental.logger;
 
 enum MIRROR = "./.mirror";
@@ -63,24 +63,24 @@ unittest {
 void run(bool clean) {
    import std.array : join;
    import std.file : readText, exists, mkdirRecurse, rmdirRecurse;
-   import std.string : startsWith;
    import std.json : parseJSON, JSONValue;
+   import std.process : execute;
+   import std.string : startsWith;
 
    string depJ = readText("localdep.json");
    JSONValue dubConfig = parseJSON(depJ);
 
    foreach (dep; dubConfig.array) {
-      writeln(dep["name"].get!string);
       string v = dep["version"].get!string;
       if (v.startsWith("v")) {
          v = v[1 .. $];
       }
 
-      string f = getFolderName(dep["name"].get!string, v);
+      string name = dep["name"].get!string;
+      string f = getFolderName(name, v);
       if (clean) {
-         tracef("Remove %s dir", f);
+         writefln("Remove %s", f);
          f.rmdirRecurse;
-         return;
       }
 
       if (!exists(f)) {
@@ -88,12 +88,16 @@ void run(bool clean) {
 
          string[] cmd = getCloneCmd(dep["url"].get!string, v, f);
          trace(cmd.join(" "));
+         writefln("Clone %s version %s", name, v);
+
          auto reply = execute(cmd);
          if (reply.status != 0) {
-            errorf("Failed\n", reply.output);
+            writeln("Failed\n", reply.output);
          } else {
-            info("Successful");
+            writeln("Successful");
          }
+      } else {
+         writeln("None to do");
       }
    }
 }
@@ -108,7 +112,7 @@ void main(string[] args) {
    if (verbose) {
       globalLogLevel(LogLevel.trace);
    } else {
-      globalLogLevel(LogLevel.error);
+      globalLogLevel(LogLevel.info);
    }
    if (opt.helpWanted) {
       defaultGetoptPrinter("dirimere", opt.options);
@@ -119,7 +123,6 @@ void main(string[] args) {
 }
 
 void help() {
-   import std.stdio : writefln;
    enum VERSION = "0.1.0";
    writefln("Version %s", VERSION);
 }
