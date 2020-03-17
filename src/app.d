@@ -28,7 +28,6 @@
 
 module app;
 
-import std.stdio;
 import std.process : execute;
 import std.experimental.logger;
 
@@ -120,4 +119,7 @@ void main(string[] args) {
 }
 
 void help() {
+   import std.stdio : writefln;
+   enum VERSION = "0.1.0";
+   writefln("Version %s", VERSION);
 }
