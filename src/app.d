@@ -123,6 +123,6 @@ void main(string[] args) {
 }
 
 void help() {
-   enum VERSION = "0.1.0";
+   enum VERSION = "0.2.0";
    writefln("Version %s", VERSION);
 }
