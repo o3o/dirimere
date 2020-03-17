@@ -10,10 +10,10 @@ Based on work by [Timur Gafarov](https://github.com/gecko0307/resolve).
 ```json
 [
    {"name": "alyx2", "version": "v0.13.0", "url" : "git@gitlab.com:o3o_d/alyx2.git"},
-   {"name": "bindbc-raylib", "version": "0.1.0", "url" : git@github.com:o3o/bindbc-raylib.git"}
+   {"name": "bindbc-raylib", "version": "0.1.0", "url" : "git@github.com:o3o/bindbc-raylib.git"}
 ]
-
 ```
+
 2. Modify your dub file on order to use `.mirror`
 ```
 //dub.sdl
@@ -21,12 +21,10 @@ dependency "alyx2:db" path="./.mirror/alyx2-0.13.0"
 ```
 
 3. Install `dirimere` and run it:
-
 ```
 dub fetch dirimere
 dub run dirimere
 ```
-
 It will create `.mirror` folder and clone the repositories. It is recommended to add `.mirror` folder to `.gitignore`.
 
 4. Build your project with Dub as usual.
