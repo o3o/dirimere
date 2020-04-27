@@ -30,8 +30,92 @@ module app;
 
 import std.stdio : writefln, writeln;
 import std.experimental.logger;
+import std.json : JSONValue;
 
 enum MIRROR = "./.mirror";
+
+void main(string[] args) {
+   import std.getopt;
+
+   bool verbose;
+   bool clean;
+   bool cs;
+
+   auto opt = getopt(args, "verbose|v", "Verbose", &verbose,
+         "clean|c", "Delete package directory", &clean,
+         "cs", "Create a cs file list", &cs
+         );
+   if (verbose) {
+      globalLogLevel(LogLevel.trace);
+   } else {
+      globalLogLevel(LogLevel.info);
+   }
+   if (opt.helpWanted) {
+      defaultGetoptPrinter("dirimere", opt.options);
+      help;
+   } else {
+      JSONValue j = makeJson();
+      trace(j);
+      run(j, clean);
+      if (cs) {
+         makeMirrorList(j);
+      }
+   }
+}
+
+JSONValue makeJson() {
+   import std.file : readText;
+   import std.json : parseJSON;
+   string depJ = readText("localdep.json");
+   return parseJSON(depJ);
+}
+
+void run(JSONValue dubConfig, bool clean) {
+   import std.array : join;
+   import std.file : exists, mkdirRecurse, rmdirRecurse;
+   import std.process : execute;
+
+   foreach (dep; dubConfig.array) {
+      string v = dep["version"].get!string.getVersion;
+      string name = dep["name"].get!string;
+      string f = getFolderName(name, v);
+      if (clean) {
+         writefln("Remove %s", f);
+         f.rmdirRecurse;
+      }
+
+      if (!exists(f)) {
+         f.mkdirRecurse;
+
+         string[] cmd = getCloneCmd(dep["url"].get!string, v, f);
+         trace(cmd.join(" "));
+         writefln("Clone %s version %s", name, v);
+
+         auto reply = execute(cmd);
+         if (reply.status != 0) {
+            writeln("Failed\n", reply.output);
+         } else {
+            writeln("Successful");
+         }
+      } else {
+         writeln("None to do");
+      }
+   }
+}
+
+string getVersion(string v) {
+   import std.string : startsWith;
+   if (v.startsWith("v")) {
+      return v[1 .. $];
+   } else {
+      return v;
+   }
+}
+
+unittest {
+   assert("v1.2.3".getVersion == "1.2.3");
+   assert("2.2.3".getVersion == "2.2.3");
+}
 
 string getFolderName(string name, string v) {
    import std.path : buildPath;
@@ -60,85 +144,25 @@ unittest {
    assert(x[5] == "v0.13.0");
 }
 
-void run(bool clean) {
-   import std.array : join;
-   import std.file : readText, exists, mkdirRecurse, rmdirRecurse;
-   import std.json : parseJSON, JSONValue;
-   import std.process : execute;
-   import std.string : startsWith;
-
-   string depJ = readText("localdep.json");
-   JSONValue dubConfig = parseJSON(depJ);
-
-   foreach (dep; dubConfig.array) {
-      string v = dep["version"].get!string;
-      if (v.startsWith("v")) {
-         v = v[1 .. $];
-      }
-
-      string name = dep["name"].get!string;
-      string f = getFolderName(name, v);
-      if (clean) {
-         writefln("Remove %s", f);
-         f.rmdirRecurse;
-      }
-
-      if (!exists(f)) {
-         f.mkdirRecurse;
-
-         string[] cmd = getCloneCmd(dep["url"].get!string, v, f);
-         trace(cmd.join(" "));
-         writefln("Clone %s version %s", name, v);
-
-         auto reply = execute(cmd);
-         if (reply.status != 0) {
-            writeln("Failed\n", reply.output);
-         } else {
-            writeln("Successful");
-         }
-      } else {
-         writeln("None to do");
-      }
-   }
-}
-
-void main(string[] args) {
-   import std.getopt;
-
-   bool verbose;
-   bool clean;
-   bool cs;
-
-   auto opt = getopt(args, "verbose|v", "Verbose", &verbose,
-         "clean|c", "Delete package directory", &clean,
-         "cs", "Create a cs file list", &cs
-         );
-   if (verbose) {
-      globalLogLevel(LogLevel.trace);
-   } else {
-      globalLogLevel(LogLevel.info);
-   }
-   if (opt.helpWanted) {
-      defaultGetoptPrinter("dirimere", opt.options);
-      help;
-   } else {
-      run(clean);
-      if (cs) {
-         makeMirrorList();
-      }
-   }
-}
-
-void makeMirrorList() {
+void makeMirrorList(JSONValue dubConfig) {
    import std.stdio : File;
    import std.file : isFile, dirEntries, SpanMode;
-
-   auto files = dirEntries(MIRROR, "*.cs", SpanMode.depth);
    auto dest = File("mirror.makefile", "w");
+   tracef("JSON file: %s", dubConfig);
    dest.write("MIRROR =");
-   foreach (s; files) {
-      if (s.isFile && s.name.isValidCsFile) {
-         dest.writef("%s ", s.name);
+
+   foreach (dep; dubConfig.array) {
+      string v = dep["version"].get!string.getVersion;
+      string name = dep["name"].get!string;
+      string f = getFolderName(name, v);
+      tracef("folder: %s", f);
+
+      auto files = dirEntries(f, "*.cs", SpanMode.depth);
+      foreach (s; files) {
+         tracef("cs file: %s", s.name);
+         if (s.isFile && s.name.isValidCsFile) {
+            dest.writef("%s ", s.name);
+         }
       }
    }
    dest.writeln();
@@ -161,6 +185,6 @@ unittest {
 }
 
 void help() {
-   enum VERSION = "0.2.0";
+   enum VERSION = "0.3.0";
    writefln("Version %s", VERSION);
 }
