@@ -1,5 +1,5 @@
 /*
- *   Copyright (c) 2020 Orfeo da Vià
+ *   Copyright (c) 2020 Orfeo Da Vià
  *
  *   Boost Software License - Version 1.0 - August 17th, 2003
  *
@@ -107,8 +107,12 @@ void main(string[] args) {
 
    bool verbose;
    bool clean;
+   bool cs;
 
-   auto opt = getopt(args, "verbose|v", "Verbose", &verbose, "clean|c", "Delete package directory", &clean);
+   auto opt = getopt(args, "verbose|v", "Verbose", &verbose,
+         "clean|c", "Delete package directory", &clean,
+         "cs", "Create a cs file list", &cs
+         );
    if (verbose) {
       globalLogLevel(LogLevel.trace);
    } else {
@@ -119,7 +123,41 @@ void main(string[] args) {
       help;
    } else {
       run(clean);
+      if (cs) {
+         makeMirrorList();
+      }
    }
+}
+
+void makeMirrorList() {
+   import std.stdio : File;
+   import std.file : isFile, dirEntries, SpanMode;
+
+   auto files = dirEntries(MIRROR, "*.cs", SpanMode.depth);
+   auto dest = File("mirror.makefile", "w");
+   dest.write("MIRROR =");
+   foreach (s; files) {
+      if (s.isFile && s.name.isValidCsFile) {
+         dest.writef("%s ", s.name);
+      }
+   }
+   dest.writeln();
+}
+
+bool isValidCsFile(in string fn) {
+   import std.algorithm.searching : canFind;
+   enum ASSEMBLY = "Assembly";
+   enum TEST = "test";
+   enum APP = "App";
+   return !(canFind(fn, ASSEMBLY) || canFind(fn, TEST) || canFind(fn, APP));
+}
+unittest {
+   assert(isValidCsFile(".mirror/Uns/src/Cul.cs"));
+   assert(!isValidCsFile(".mirror/Uns/src/App.cs"));
+   assert(!isValidCsFile(".mirror/Uns/src/AssemblyInfo.cs"));
+   assert(!isValidCsFile(".mirror/Uns/src/IAssemblyInfo.cs"));
+   assert(!isValidCsFile(".mirror/Uns/test/Cul.cs"));
+   assert(!isValidCsFile(".mirror/Uns/tests/Cul.cs"));
 }
 
 void help() {
