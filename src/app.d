@@ -40,9 +40,11 @@ void main(string[] args) {
    bool verbose;
    bool clean;
    bool cs;
+   string proxyFile = "dirimere.json";
 
    auto opt = getopt(args, "verbose|v", "Verbose", &verbose,
          "clean|c", "Delete package directory", &clean,
+         "proxyFile|i", "The filename of the file to search packages in", &proxyFile,
          "cs", "Create a cs file list", &cs
          );
    if (verbose) {
@@ -63,10 +65,10 @@ void main(string[] args) {
    }
 }
 
-JSONValue makeJson() {
+JSONValue makeJson(string fn) {
    import std.file : readText;
    import std.json : parseJSON;
-   string depJ = readText("localdep.json");
+   string depJ = readText(fn);
    return parseJSON(depJ);
 }
 
