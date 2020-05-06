@@ -13,3 +13,4 @@ dirimere-test-*
 *.o
 *.obj
 *.lst
+.mirror/
