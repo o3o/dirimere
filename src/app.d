@@ -56,7 +56,7 @@ void main(string[] args) {
       defaultGetoptPrinter("dirimere", opt.options);
       help;
    } else {
-      JSONValue j = makeJson();
+      JSONValue j = makeJson(proxyFile);
       trace(j);
       run(j, clean);
       if (cs) {
