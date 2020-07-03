@@ -39,13 +39,11 @@ void main(string[] args) {
 
    bool verbose;
    bool clean;
-   bool cs;
    string proxyFile = "dirimere.json";
 
    auto opt = getopt(args, "verbose|v", "Verbose", &verbose,
          "clean|c", "Delete package directory", &clean,
          "proxyFile|i", "The filename of the file to search packages in", &proxyFile,
-         "cs", "Create a cs file list", &cs
          );
    if (verbose) {
       globalLogLevel(LogLevel.trace);
@@ -59,9 +57,6 @@ void main(string[] args) {
       JSONValue j = makeJson(proxyFile);
       trace(j);
       run(j, clean);
-      if (cs) {
-         makeMirrorList(j);
-      }
    }
 }
 
@@ -146,29 +141,6 @@ unittest {
    assert(x[5] == "v0.13.0");
 }
 
-void makeMirrorList(JSONValue dubConfig) {
-   import std.stdio : File;
-   import std.file : isFile, dirEntries, SpanMode;
-   auto dest = File("mirror.makefile", "w");
-   tracef("JSON file: %s", dubConfig);
-   dest.write("MIRROR =");
-
-   foreach (dep; dubConfig.array) {
-      string v = dep["version"].get!string.getVersion;
-      string name = dep["name"].get!string;
-      string f = getFolderName(name, v);
-      tracef("folder: %s", f);
-
-      auto files = dirEntries(f, "*.cs", SpanMode.depth);
-      foreach (s; files) {
-         tracef("cs file: %s", s.name);
-         if (s.isFile && s.name.isValidCsFile) {
-            dest.writef("%s ", s.name);
-         }
-      }
-   }
-   dest.writeln();
-}
 
 bool isValidCsFile(in string fn) {
    import std.algorithm.searching : canFind;
