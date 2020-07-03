@@ -159,6 +159,6 @@ unittest {
 }
 
 void help() {
-   enum VERSION = "0.4.0";
+   enum VERSION = "0.5.0";
    writefln("Version %s", VERSION);
 }
