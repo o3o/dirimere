@@ -32,7 +32,7 @@ import std.stdio : writefln, writeln;
 import std.experimental.logger;
 import std.json : JSONValue;
 
-enum MIRROR = "./.mirror";
+enum MIRROR = "./.dirimere";
 
 void main(string[] args) {
    import std.getopt;
@@ -56,7 +56,7 @@ void main(string[] args) {
       defaultGetoptPrinter("dirimere", opt.options);
       help;
    } else {
-      JSONValue j = makeJson();
+      JSONValue j = makeJson(proxyFile);
       trace(j);
       run(j, clean);
       if (cs) {

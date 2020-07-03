@@ -5,7 +5,7 @@ Based on work by [Timur Gafarov](https://github.com/gecko0307/resolve).
 
 
 ## Usage
-1. Create a `localdep.json` file in your Dub project. It should look like this:
+1. Create a `dirimere.json` file in your Dub project. It should look like this:
 
 ```json
 [
