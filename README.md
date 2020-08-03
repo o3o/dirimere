@@ -30,6 +30,10 @@ It will create `.dirimere` folder and clone the repositories. It is recommended 
 4. Build your project with Dub as usual.
 
 ## Json file
+`dirimere.json` is an array of Json objects.
+Each object has the following values
+
+
 ### name
 Name of package. Will be used to create the path where the gits get cloned to.
 
@@ -39,7 +43,6 @@ Must be v`m.n.p` or `m.n.p`. (examples `v0.1.0`, `1.5.0`, etc)
 
 ### url
 Repository URL.
-
 
 
 ## References
