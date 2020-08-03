@@ -14,10 +14,10 @@ Based on work by [Timur Gafarov](https://github.com/gecko0307/resolve).
 ]
 ```
 
-2. Modify your dub file on order to use `.mirror`
+2. Modify your dub file on order to use `.dirimere`
 ```
 //dub.sdl
-dependency "alyx2:db" path="./.mirror/alyx2-0.13.0"
+dependency "alyx2:db" path="./.dirimere/alyx2-0.13.0"
 ```
 
 3. Install `dirimere` and run it:
@@ -25,7 +25,7 @@ dependency "alyx2:db" path="./.mirror/alyx2-0.13.0"
 dub fetch dirimere
 dub run dirimere
 ```
-It will create `.mirror` folder and clone the repositories. It is recommended to add `.mirror` folder to `.gitignore`.
+It will create `.dirimere` folder and clone the repositories. It is recommended to add `.dirimere` folder to `.gitignore`.
 
 4. Build your project with Dub as usual.
 
